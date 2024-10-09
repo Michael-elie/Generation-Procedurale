@@ -15,15 +15,26 @@ public class BspGenerator : MonoBehaviour
   
   private void Start()
   {
-    rnd = new System.Random(_seed);
-    _firstRoom = new Room(20,20,Vector2.zero);
+    
+    //_firstRoom = new Room(20,20,Vector2.zero);
+  }
+
+  public void GenerateRooms()
+  {
+    
   }
   
 
   public List<Room> _rooms(List<Room> rooms, int maxRooms)
   {
+    List<Room> binaryRooms = new List<Room>();
+    rnd = new System.Random(_seed);
     
-    return rooms;
+
+
+
+
+    return binaryRooms;
   }
   
   public void Split() {
