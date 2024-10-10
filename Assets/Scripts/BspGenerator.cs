@@ -1,114 +1,127 @@
-  using System;
-  using System.CodeDom.Compiler;
-  using System.Collections;
-  using System.Collections.Generic;
-  using UnityEngine;
-  using UnityEngine.Tilemaps;
-  using Random = UnityEngine.Random;
+using System;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.Serialization;
+using UnityEngine.Tilemaps;
+using Random = System.Random;
 
 
-  public class BspGenerator : MonoBehaviour
-  {
-    public List<Room> rooms = new List<Room>();
-    [SerializeField] private int maxRooms = 10;
-    [SerializeField] private int _seed;
-    [SerializeField] float minRoomSize = 3f;
-    //private Room _firstRoom;
-    private System.Random rnd;
-    private bool _lastSplitWasHorizontal;
+public class BspGenerator : MonoBehaviour
+{
+    public List<Room> Rooms = new List<Room>();
+    public enum SplitDirection { Horizontal , Vertical  }
+    public SplitDirection splitDirection;
+    [SerializeField] private int initialHeightRoom = 50;
+    [SerializeField] private int initialWidhtRoom = 100;
+    [SerializeField] private int seed;
+    [SerializeField] private int depth;
+    [SerializeField] private Tilemap tilemap;
+    [SerializeField] private Tile floorTile;
+    private Room _firstRoom;
+    private Random _rnd;
     
-    private void Start() {
-     
-      Room initialRoom = new Room(new Vector2Int(0, 0),50, 50);
-      rooms.Add(initialRoom);
-      GenerateRooms(initialRoom);
-     
+
+    [ContextMenu("BSP Generation")]
+    public void BSP() {
+        _firstRoom = new Room(new Vector2Int(0, 0), initialWidhtRoom, initialHeightRoom);
+        Rooms.Add(_firstRoom);
+        Debug.Log($"FisrtRoom width :{_firstRoom.Widht}, FirstRoom height : ,{_firstRoom.Height} ");
+        RoomsGeneration(_firstRoom);
     }
 
-
-    private void GenerateRooms(Room room) {
-     
-      /*Room initialRoom = new Room(new Vector2Int(0, 0),100, 50 );
-      rooms.Add(initialRoom);*/
-
-      if (room.Widht <= minRoomSize || room.Height <= minRoomSize) {
-        return; // stop si la salle est trop petite
-      }
-      
-      /*if (rooms.Count >= 10)
-      {
-        return;
-      }*/
-      
-      List<Room> newRooms = _rooms(room);
-      rooms.Remove(room);
-      
-      foreach (Room newRoom in newRooms) {
-        rooms.Add(newRoom);
-        //GenerateRooms(newRoom);
-      }
-    
-      
-    }
-    
-
-    public List<Room> _rooms(Room room) {
-    
-      rnd = new System.Random(_seed);
-      List<Room> newRooms = new List<Room>();
-
-      bool splitHonrizontaly = rnd.Next(0, 2) == 0; //2 exclus 
-     // splitHonrizontaly = !_lastSplitWasHorizontal;
-
-      if (splitHonrizontaly) {
-       // int splitWidth = room.Widht / 2;
-       int splitWidth = rnd.Next(1, (room.Widht ));
-        Room room1 = new Room(room.Position, splitWidth, room.Height);
-        Room room2 = new Room(new Vector2Int(room.Position.x + splitWidth, room.Position.y), splitWidth, room.Height);
-        newRooms.Add(room1);
-        newRooms.Add(room2);
-      }
-      else {
-       // int splitHeight = room.Height / 2;  
-       int splitHeight = rnd.Next(1, (room.Height ));
-        Room room1 = new Room(room.Position, room.Widht, splitHeight);
-        Room room2 = new Room(new Vector2Int(room.Position.x, room.Position.y + splitHeight), room.Widht, splitHeight);
-        newRooms.Add(room1);
-        newRooms.Add(room2);
+    private void RoomsGeneration(Room room) {
+      /*  if (room.Widht <= minRoomSize.x || room.Height <= minRoomSize.y) return;  stop si la salle est trop petite*/
         
-      }
-      
-      _lastSplitWasHorizontal = splitHonrizontaly;
-      return newRooms;
+        _roomsSplit(_firstRoom);
+        _recursiveSplit(Rooms, depth);
+        RoomVizualizer(Rooms);
     }
-    
-    
-   /* public void HorizontalSplit(List<Room> newRooms) {
-      // sur la height
-      
-      int splitPoint = rnd.Next();
-      
-      Room room1 = new Room(
-      
-    }
-    
-    public void VerticalSplit() {
-      // sur la Widht
-    }*/
-    
-    
-    
-     void OnDrawGizmos()
-     {
-       Gizmos.color = Color.red;
 
-       // Dessine chaque salle dans la liste
-       foreach (Room room in rooms)
-       {
-         Gizmos.DrawWireCube(new Vector3(room.Position.x + room.Widht / 2, room.Position.y + room.Height / 2, 0), new Vector3(room.Widht, room.Height, 0));
+    public List<Room> _recursiveSplit(List<Room> rooms, int depth) {
+        if (depth == 0) return rooms;
+        // Find a room to cut
+        //Room roomToCut = rooms[UnityEngine.Random.Range(0, rooms.Count)];
+        Room roomToCut = FindTheBiggestRoom();
+        // Cut the room
+        List<Room> newRooms = _roomsSplit(roomToCut);
+        // Remove the cutted room
+        rooms.Remove(roomToCut);
+        // Add the new rooms
+        foreach (Room newRoom in newRooms)
+        {
+            Rooms.Add(newRoom);
+            Debug.Log($"Room width :{newRoom.Widht}, Room height : ,{newRoom.Height} ,Room Position : ,{newRoom.Position}");
+        }
+        // Go to next iteration
+        return _recursiveSplit(rooms, depth - 1);
+    }
+    
+    public List<Room> _roomsSplit(Room room) {
+        
+        _rnd = new Random(seed);
+        var newRooms = new List<Room>();
+        
+        
+        if (splitDirection  == SplitDirection.Vertical) {
+            // vercital slice 
+            int cutValue = _rnd.Next(1, (room.Height * _rnd.Next(2,9)/ 10 ));
+           //int cutValue = _rnd.Next(1, (room.Height-1));
+            
+            var room1 = new Room(room.Position, room.Widht, cutValue);
+            var room2 = new Room(new Vector2Int(room.Position.x, room.Position.y + cutValue), room.Widht,
+                room.Height - cutValue);
+            newRooms.Add(room1);
+            newRooms.Add(room2);
+
+            splitDirection = SplitDirection.Horizontal;
+        }
+        else {
+            // horizontal slice 
+            int cutValue = _rnd.Next(1, (room.Widht * _rnd.Next(2,9)/ 10 ));
+           // int cutValue = _rnd.Next(1, (room.Widht-1));
+            var room1 = new Room(room.Position, cutValue, room.Height);
+            var room2 = new Room(new Vector2Int(room.Position.x + cutValue, room.Position.y), room.Widht - cutValue, room.Height);
+            newRooms.Add(room1);
+            newRooms.Add(room2);
+
+            splitDirection = SplitDirection.Vertical;
+        }
+        
+        return newRooms;
+    }
+
+    public Room FindTheBiggestRoom()
+    {
+        Room biggestRoom = new Room(Vector2Int.zero,0,0);
+        foreach (var room in Rooms) {
+            
+            int roomArea = room.Widht * room.Height;
+            int biggestRoomArea = biggestRoom.Widht * biggestRoom.Height;
+            if (roomArea > biggestRoomArea) {
+                biggestRoom = room;
+            }
+        }
+        return biggestRoom;
+        
+    }
+   private void RoomVizualizer(List<Room> rooms) {
+       foreach (Room room in rooms) {
+           Color randomColor = new Color((float)_rnd.NextDouble(), (float)_rnd.NextDouble(), (float)_rnd.NextDouble());
+           
+           for (int x = 0; x < room.Widht; x++) {
+               
+               for (int y = 0; y < room.Height; y++) {
+                   
+                   Vector3Int tilePosition = new Vector3Int(room.Position.x + x, room.Position.y + y, 0);
+                   tilemap.SetTile(tilePosition, floorTile);
+                   tilemap.SetTileFlags(tilePosition, TileFlags.None);
+                   tilemap.SetColor(tilePosition, randomColor);
+               }
+           }
        }
-     }
+      
+    }
     
     
     
-  }
+}
