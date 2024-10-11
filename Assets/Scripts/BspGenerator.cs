@@ -31,7 +31,7 @@ public class BspGenerator : MonoBehaviour
 
     private void RoomsGeneration(Room room) {
       /*  if (room.Widht <= minRoomSize.x || room.Height <= minRoomSize.y) return;  stop si la salle est trop petite*/
-        
+        _rnd = new Random(seed);
         _roomsSplit(_firstRoom);
         _recursiveSplit(Rooms, depth);
         RoomVizualizer(Rooms);
@@ -58,15 +58,12 @@ public class BspGenerator : MonoBehaviour
     
     public List<Room> _roomsSplit(Room room) {
         
-        _rnd = new Random(seed);
         var newRooms = new List<Room>();
         
         
         if (splitDirection  == SplitDirection.Vertical) {
             // vercital slice 
-            int cutValue = _rnd.Next(1, (room.Height * _rnd.Next(2,9)/ 10 ));
-           //int cutValue = _rnd.Next(1, (room.Height-1));
-            
+            int cutValue = _rnd.Next(1, (room.Height * _rnd.Next(5,7)/ 10 ));
             var room1 = new Room(room.Position, room.Widht, cutValue);
             var room2 = new Room(new Vector2Int(room.Position.x, room.Position.y + cutValue), room.Widht,
                 room.Height - cutValue);
@@ -77,8 +74,7 @@ public class BspGenerator : MonoBehaviour
         }
         else {
             // horizontal slice 
-            int cutValue = _rnd.Next(1, (room.Widht * _rnd.Next(2,9)/ 10 ));
-           // int cutValue = _rnd.Next(1, (room.Widht-1));
+            int cutValue = _rnd.Next(1, (room.Widht * _rnd.Next(5,7)/ 10 ));
             var room1 = new Room(room.Position, cutValue, room.Height);
             var room2 = new Room(new Vector2Int(room.Position.x + cutValue, room.Position.y), room.Widht - cutValue, room.Height);
             newRooms.Add(room1);
@@ -88,6 +84,7 @@ public class BspGenerator : MonoBehaviour
         }
         
         return newRooms;
+        
     }
 
     public Room FindTheBiggestRoom()
