@@ -18,7 +18,9 @@ public struct Room
       //CenterPosition = centerPoint;
    }
    
-   
+   public Vector2 GetCenter() {
+      return new Vector2(Position.x + Widht / 2, Position.y + Height / 2);
+   }
    
    
 }
