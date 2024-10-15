@@ -167,12 +167,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   splitDirection: 1
-  initialHeightRoom: 10
-  initialWidhtRoom: 18
+  initialHeightRoom: 25
+  initialWidhtRoom: 50
   seed: 222
-  depth: 5
+  depth: 29
   tilemap: {fileID: 855770081}
   floorTile: {fileID: 11400000, guid: 6a22fdb169cfa4949a86afac24170b58, type: 2}
+  CorridorTile: {fileID: 0}
 --- !u!1 &519420028
 GameObject:
   m_ObjectHideFlags: 0
