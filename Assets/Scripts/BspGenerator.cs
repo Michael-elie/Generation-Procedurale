@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Serialization;
 using UnityEngine.Tilemaps;
 using Random = System.Random;
 
@@ -17,21 +16,27 @@ using Random = System.Random;
     [SerializeField] private int depth;
     [SerializeField] private Tilemap tilemap;
     [SerializeField] private Tile floorTile;
-    [SerializeField] private Tile CorridorTile;
     private Room _firstRoom;
     private Random _rnd;
+    private DelauneyTriangulator delaunayTriangulator;
     
     [ContextMenu("BSP Generation")]
     public void BSP() {
+        _rnd = new Random(seed);
         _firstRoom = new Room(new Vector2Int(0, 0), initialWidhtRoom, initialHeightRoom);
         Rooms.Add(_firstRoom);
         Debug.Log($"FisrtRoom width :{_firstRoom.Widht}, FirstRoom height : ,{_firstRoom.Height} ");
         RoomsGeneration(_firstRoom);
+        
+        
+        delaunayTriangulator = new DelauneyTriangulator(); // Initialiser le triangulateur
+        delaunayTriangulator.Triangulate(Rooms); // Appeler la méthode de triangulation
+        delaunayTriangulator.DrawTriangles();
     }
 
     private void RoomsGeneration(Room room) {
       /*  if (room.Widht <= minRoomSize.x || room.Height <= minRoomSize.y) return;  stop si la salle est trop petite*/
-        _rnd = new Random(seed);
+        
         _roomsSplit(_firstRoom);
         _recursiveSplit(Rooms, depth);
         RoomVizualizer(Rooms);

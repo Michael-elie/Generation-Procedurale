@@ -3,48 +3,49 @@ using UnityEngine;
 
 
 
-public class Vertex // sommets
-{
-    private float _x;
-    private float _y;
-
-    public Vertex(float x, float y)
+    public class Vertex // sommets
     {
-        _x = x;
-        _y = y;
-    }
+        private float _x;
+        private float _y;
 
-    public bool Equals(Vertex otherVertex)
-    {
-        // return (_x == otherVertex._x && _y == otherVertex._y);
-        return (Mathf.Approximately(_x, otherVertex._x) && Mathf.Approximately(_y, otherVertex._y));
-    }
+        public Vertex(float x, float y)
+        {
+            _x = x;
+            _y = y;
+        }
 
+        public bool Equals(Vertex otherVertex)
+        {
+            // return (_x == otherVertex._x && _y == otherVertex._y);
+            return (Mathf.Approximately(_x, otherVertex._x) && Mathf.Approximately(_y, otherVertex._y));
+        }
+
+    }
 
     public class Edge // aretes
-    {
-        private Vector2 _vertex0, _vertex1;
-        public Edge(Vector2 vertex0, Vector2 vertex1) {
-            _vertex0 = vertex0;
-            _vertex1 = vertex1;
+        {
+            public Vector2 Vertex0, Vertex1;
+            public Edge(Vector2 vertex0, Vector2 vertex1) {
+                Vertex0 = vertex0;
+                Vertex1 = vertex1;
+            }
+            public bool Equals(Edge otherEdge) {
+                return (Vertex0 == otherEdge.Vertex0 && Vertex1 == otherEdge.Vertex1) ||
+                       (Vertex0 == otherEdge.Vertex1 && Vertex1 == otherEdge.Vertex0);
+            }
         }
-        public bool Equals(Edge otherEdge) {
-            return (_vertex0 == otherEdge._vertex0 && _vertex1 == otherEdge._vertex1) ||
-                   (_vertex0 == otherEdge._vertex1 && _vertex1 == otherEdge._vertex0);
-        }
-    }
 
     public class Triangle
     {
-        private Vector2 _vertex0, _vertex1, _vertex2;
+        public Vector2 Vertex0, Vertex1, Vertex2;
         public Circle CircumCircle;
 
         public Triangle(Vector2 vertex0, Vector2 vertex1, Vector2 vertex2)
         {
 
-            _vertex0 = vertex0;
-            _vertex1 = vertex1;
-            _vertex2 = vertex2;
+            Vertex0 = vertex0;
+            Vertex1 = vertex1;
+            Vertex2 = vertex2;
             CircumCircle = CalcCircumCirc(vertex0, vertex1, vertex2);
         }
 
@@ -67,7 +68,7 @@ public class Vertex // sommets
             return new Circle(circumcenter, radius);
         }
         
-        public bool InCircumcircle(Vector2 point)
+        public bool InCircumcircle(Vector2 point) 
         {
             if (CircumCircle == null)
             {
@@ -83,24 +84,55 @@ public class Vertex // sommets
             
             return distSquared <= radiusSquared;
         }
+        
+        
+    }
+    
+    public class Circle
+    {
 
+        public Vector2 Center;
+        public float Radius;
 
-
-        public class Circle
+        public Circle(Vector2 center, float radius)
         {
 
-            public Vector2 Center;
-            public float Radius;
-
-            public Circle(Vector2 center, float radius)
-            {
-
-                Center = center;
-                Radius = radius;
-            }
+            Center = center;
+            Radius = radius;
         }
     }
-}   
-
+    
    
+
+    public class SuperTriangle
+    {
+        public Triangle triangle;
+
+        public SuperTriangle(List<Room> rooms)
+        {
+            float minx = Mathf.Infinity, miny = Mathf.Infinity;
+            float maxx = -Mathf.Infinity, maxy = -Mathf.Infinity;
+
+            // Trouver les coordonnées min et max des centres de salles
+            foreach (var room in rooms)
+            {
+                Vector2 center = room.GetCenter();
+                minx = Mathf.Min(minx, center.x);
+                miny = Mathf.Min(miny, center.y);
+                maxx = Mathf.Max(maxx, center.x);
+                maxy = Mathf.Max(maxy, center.y);
+            }
+
+            // Créer le super triangle autour des coordonnées des salles
+            float dx = maxx - minx;
+            float dy = maxy - miny;
+            float padding = 10f; // Espace pour s'assurer que le super triangle est assez grand
+            triangle = new Triangle(
+                new Vector2(minx - padding, miny - padding),
+                new Vector2(maxx + padding, miny - padding),
+                new Vector2((minx + maxx) / 2, maxy + padding)
+            );
+        }
+    }
+       
 
