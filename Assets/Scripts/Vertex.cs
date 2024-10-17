@@ -108,30 +108,9 @@ using UnityEngine;
     {
         public Triangle triangle;
 
-        public SuperTriangle(List<Room> rooms)
+        public SuperTriangle(Room initialRoom)
         {
-            float minx = Mathf.Infinity, miny = Mathf.Infinity;
-            float maxx = -Mathf.Infinity, maxy = -Mathf.Infinity;
-
-            // Trouver les coordonnées min et max des centres de salles
-            foreach (var room in rooms)
-            {
-                Vector2 center = room.GetCenter();
-                minx = Mathf.Min(minx, center.x);
-                miny = Mathf.Min(miny, center.y);
-                maxx = Mathf.Max(maxx, center.x);
-                maxy = Mathf.Max(maxy, center.y);
-            }
-
-            // Créer le super triangle autour des coordonnées des salles
-            float dx = maxx - minx;
-            float dy = maxy - miny;
-            float padding = 10f; // Espace pour s'assurer que le super triangle est assez grand
-            triangle = new Triangle(
-                new Vector2(minx - padding, miny - padding),
-                new Vector2(maxx + padding, miny - padding),
-                new Vector2((minx + maxx) / 2, maxy + padding)
-            );
+         // triangle = new Triangle()
         }
     }
        

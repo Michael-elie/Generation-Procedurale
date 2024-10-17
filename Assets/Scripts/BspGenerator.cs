@@ -28,10 +28,10 @@ using Random = System.Random;
         Debug.Log($"FisrtRoom width :{_firstRoom.Widht}, FirstRoom height : ,{_firstRoom.Height} ");
         RoomsGeneration(_firstRoom);
         
-        
-        delaunayTriangulator = new DelauneyTriangulator(); // Initialiser le triangulateur
-        delaunayTriangulator.Triangulate(Rooms); // Appeler la méthode de triangulation
-        delaunayTriangulator.DrawTriangles();
+        SuperTriangle superTriangle = new SuperTriangle(_firstRoom);
+        delaunayTriangulator = new DelauneyTriangulator();
+        delaunayTriangulator.Triangulate(Rooms); 
+       // delaunayTriangulator.DrawTriangles();
     }
 
     private void RoomsGeneration(Room room) {
