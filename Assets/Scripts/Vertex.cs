@@ -110,7 +110,12 @@ using UnityEngine;
 
         public SuperTriangle(Room initialRoom)
         {
-         // triangle = new Triangle()
+          triangle = new Triangle(
+              new Vector2(),
+              new Vector2(),
+              new Vector2()
+          );
+         
         }
     }
        

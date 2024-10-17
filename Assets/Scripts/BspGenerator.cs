@@ -20,18 +20,36 @@ using Random = System.Random;
     private Random _rnd;
     private DelauneyTriangulator delaunayTriangulator;
     
+    
+    [ContextMenu("Delauny Triangulation")]
+    public void LaunchDelaunayTriangulation()
+    {
+        delaunayTriangulator = new DelauneyTriangulator();
+        delaunayTriangulator.Triangulate(Rooms, _firstRoom);
+        delaunayTriangulator.DrawTriangles();
+        Debug.Log("il y a " + delaunayTriangulator.triangles.Count + " triangles");
+    }
+    
+    
     [ContextMenu("BSP Generation")]
     public void BSP() {
+        Rooms.Clear();
         _rnd = new Random(seed);
         _firstRoom = new Room(new Vector2Int(0, 0), initialWidhtRoom, initialHeightRoom);
         Rooms.Add(_firstRoom);
         Debug.Log($"FisrtRoom width :{_firstRoom.Widht}, FirstRoom height : ,{_firstRoom.Height} ");
         RoomsGeneration(_firstRoom);
+        Debug.Log("il y a " + Rooms.Count + " salles");
         
-        SuperTriangle superTriangle = new SuperTriangle(_firstRoom);
-        delaunayTriangulator = new DelauneyTriangulator();
-        delaunayTriangulator.Triangulate(Rooms); 
-       // delaunayTriangulator.DrawTriangles();
+    }
+
+    private void OnDrawGizmos()
+    {
+        foreach (var room in Rooms)
+        {
+            Gizmos.DrawSphere(room.GetCenter(), 0.25f);
+        }
+        
     }
 
     private void RoomsGeneration(Room room) {
@@ -40,6 +58,7 @@ using Random = System.Random;
         _roomsSplit(_firstRoom);
         _recursiveSplit(Rooms, depth);
         RoomVizualizer(Rooms);
+      
     }
 
     public List<Room> _recursiveSplit(List<Room> rooms, int depth) {
@@ -55,7 +74,8 @@ using Random = System.Random;
         foreach (Room newRoom in newRooms)
         {
             Rooms.Add(newRoom);
-            Debug.Log($"Room width :{newRoom.Widht}, Room height : ,{newRoom.Height} ,Room Position : ,{newRoom.Position}");
+           // Debug.Log($"Room width :{newRoom.Widht}, Room height : ,{newRoom.Height} ,Room Position : ,{newRoom.Position}");
+           //Debug.Log(newRoom.GetCenter());
         }
         // Go to next iteration
         return _recursiveSplit(rooms, depth - 1);
@@ -67,9 +87,9 @@ using Random = System.Random;
         
         if (splitDirection  == SplitDirection.Vertical) {
             // vercital slice 
-            int cutValue = _rnd.Next(1, (room.Height * _rnd.Next(5,7)/ 10 ));
+            float cutValue = _rnd.Next(1, (int)(room.Height * _rnd.Next(5,7)/ 10 ));
             var room1 = new Room(room.Position, room.Widht, cutValue);
-            var room2 = new Room(new Vector2Int(room.Position.x, room.Position.y + cutValue), room.Widht,
+            var room2 = new Room(new Vector2Int(room.Position.x, (int)(room.Position.y + cutValue)), room.Widht,
                 room.Height - cutValue);
             newRooms.Add(room1);
             newRooms.Add(room2);
@@ -77,9 +97,9 @@ using Random = System.Random;
         }
         else {
             // horizontal slice 
-            int cutValue = _rnd.Next(1, (room.Widht * _rnd.Next(5,7)/ 10 ));
+            float cutValue = _rnd.Next(1, (int)(room.Widht * _rnd.Next(5,7)/ 10 ));
             var room1 = new Room(room.Position, cutValue, room.Height);
-            var room2 = new Room(new Vector2Int(room.Position.x + cutValue, room.Position.y), room.Widht - cutValue, room.Height);
+            var room2 = new Room(new Vector2Int((int)(room.Position.x + cutValue), room.Position.y), room.Widht - cutValue, room.Height);
             newRooms.Add(room1);
             newRooms.Add(room2);
             splitDirection = SplitDirection.Vertical;
@@ -92,8 +112,8 @@ using Random = System.Random;
         Room biggestRoom = new Room(Vector2Int.zero,0,0);
         foreach (var room in Rooms) {
             
-            int roomArea = room.Widht * room.Height;
-            int biggestRoomArea = biggestRoom.Widht * biggestRoom.Height;
+            float roomArea = room.Widht * room.Height;
+            float biggestRoomArea = biggestRoom.Widht * biggestRoom.Height;
             if (roomArea > biggestRoomArea) {
                 biggestRoom = room;
             }
